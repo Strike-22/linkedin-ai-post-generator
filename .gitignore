@@ -1,0 +1,26 @@
+# Environment variables (contains real API keys - never commit)
+.env
+backend/.env
+
+# Dependencies
+node_modules/
+backend/node_modules/
+
+# Uploaded/generated files
+uploads/
+backend/uploads/
+generated-images/
+backend/generated-images/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+backend/publish-log.json

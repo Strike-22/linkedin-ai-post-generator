@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LinkedIn AI Post Scheduler</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar" aria-label="Workflow">
+        <div class="sidebar-header">
+          <div>
+            <p class="eyebrow">Daily LinkedIn agent</p>
+            <h1>AI trend-to-post scheduler</h1>
+          </div>
+          <button id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode"></button>
+        </div>
+        <nav class="steps" aria-label="Post generation steps">
+          <a class="step active" href="#topics">Trending topics</a>
+          <a class="step" href="#settings">Post settings</a>
+          <a class="step" href="#schedule">Schedule</a>
+        </nav>
+        <section class="status-panel" aria-live="polite">
+          <span class="status-dot" id="scheduleDot"></span>
+          <span class="status-label" id="scheduleLabel">Schedule disabled</span>
+          <span class="status-meta" id="scheduleMeta">— No automatic publishing is active.</span>
+        </section>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Topic discovery</p>
+            <h2>Browse AI, ML, analytics, and data trends</h2>
+          </div>
+          <button class="secondary" id="refreshTopics" type="button">Refresh topics</button>
+        </header>
+
+        <section class="layout-grid">
+          <section class="panel topics-panel" id="topics" aria-labelledby="topicsTitle">
+            <div class="panel-heading">
+              <h3 id="topicsTitle">Trending topics</h3>
+              <label class="search-label">
+                <span class="sr-only">Filter topics</span>
+                <input id="topicFilter" type="search" placeholder="Filter by keyword" />
+              </label>
+            </div>
+            <div class="topic-list" id="topicList"></div>
+          </section>
+
+          <section class="panel settings-panel" id="settings" aria-labelledby="settingsTitle">
+            <div class="panel-heading">
+              <div>
+                <h3 id="settingsTitle">Post settings</h3>
+                <p class="panel-subtitle" id="generationStatus">Choose settings, then generate with Gemini.</p>
+              </div>
+              <div class="heading-actions">
+                <button class="icon-button" id="refreshTemplate" type="button" aria-label="Refresh post template" title="Refresh post template">
+                  <svg aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M21 12a9 9 0 0 1-15.37 6.36M3 12a9 9 0 0 1 15.37-6.36" />
+                    <path d="M8 18H5v3" />
+                    <path d="M16 6h3V3" />
+                  </svg>
+                </button>
+                <button class="primary" id="generatePost" type="button">Generate with Gemini</button>
+              </div>
+            </div>
+            <div class="controls">
+              <label>
+                Tone
+                <select id="tone">
+                  <option>Insightful</option>
+                  <option>Founder-like</option>
+                  <option>Warm mentor</option>
+                  <option>Contrarian</option>
+                </select>
+              </label>
+              <label>
+                Length
+                <select id="length">
+                  <option value="short">Short - 100 words</option>
+                  <option value="medium" selected>Medium - 180 words</option>
+                  <option value="long">Long - 280 words</option>
+                </select>
+              </label>
+              <label>
+                Audience
+                <select id="audience">
+                  <option>Students</option>
+                  <option>Institute instructors</option>
+                  <option>HR and recruiters</option>
+                  <option>Professional connections</option>
+                </select>
+              </label>
+            </div>
+            <div class="image-tools">
+              <div class="panel-heading compact-heading">
+                <div>
+                  <h3>Image for LinkedIn</h3>
+                  <p class="panel-subtitle">Use this prompt in ChatGPT/NoteGPT/etc., then upload the PNG/JPG here.</p>
+                </div>
+                <button class="secondary" id="copyImagePrompt" type="button">Copy prompt</button>
+              </div>
+              <textarea id="imagePrompt" rows="8" aria-label="Image generation prompt"></textarea>
+              <label class="upload-box">
+                <span>Upload image for this post</span>
+                <input id="postImage" type="file" accept="image/png,image/jpeg" />
+              </label>
+              <div class="uploaded-preview" id="uploadedPreview">No image selected.</div>
+            </div>
+            <textarea id="postPreview" rows="18" aria-label="Generated LinkedIn post">Select a topic and click Generate post.</textarea>
+            <div class="publish-actions">
+              <button class="secondary" id="publishTextOnly" type="button">Publish text only</button>
+              <button class="primary" id="publishWithImage" type="button">Publish with image</button>
+            </div>
+          </section>
+
+          <section class="panel schedule-panel" id="schedule" aria-labelledby="scheduleTitle">
+            <div class="panel-heading">
+              <h3 id="scheduleTitle">Schedule</h3>
+              <label class="switch">
+                <input id="scheduleToggle" type="checkbox" />
+                <span></span>
+                Daily publishing
+              </label>
+            </div>
+            <div class="controls">
+              <label>
+                Publish time
+                <input id="publishTime" type="time" value="09:00" />
+              </label>
+              <label>
+                Time zone
+                <select id="timezone">
+                  <option>Asia/Calcutta</option>
+                  <option>America/New_York</option>
+                  <option>Europe/London</option>
+                  <option>UTC</option>
+                </select>
+              </label>
+            </div>
+            <p class="compliance-note">Publishing should use LinkedIn OAuth and the official posting API. Disabling the toggle stops future runs immediately in this MVP state model.</p>
+            <details class="run-log-wrap">
+              <summary>Activity log</summary>
+              <div class="run-log" id="runLog" aria-live="polite"></div>
+            </details>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

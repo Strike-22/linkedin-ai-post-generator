@@ -1,0 +1,25 @@
+{
+  "name": "linkedin-ai-post-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch server.js",
+    "start": "node server.js",
+    "check": "node --check server.js && node --check services/trendFetcher.js && node --check services/postGenerator.js && node --check services/linkedin.js && node --check services/scheduler.js && node --check services/geminiImageGenerator.js && node --check services/publishLog.js && node --check config/redis.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@google/genai": "^1.52.0",
+    "axios": "^1.7.9",
+    "bullmq": "^5.34.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "ioredis": "^5.4.2",
+    "multer": "^2.0.2",
+    "rss-parser": "^3.13.0"
+  }
+}
