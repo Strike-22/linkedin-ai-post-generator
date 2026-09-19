@@ -1,4 +1,4 @@
-# LinkedIn AI Post Scheduler
+# LinkedIn AI Post Generator
 
 An end-to-end tool that generates educational LinkedIn posts using Google Gemini, manages a content queue, and publishes directly to LinkedIn — with optional daily scheduling via Redis-backed BullMQ job queues.
 
