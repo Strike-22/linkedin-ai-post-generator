@@ -3,7 +3,11 @@ import cors from 'cors';
 import crypto from 'node:crypto';
 import multer from 'multer';
 import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import 'dotenv/config';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 import { fetchTrends } from './services/trendFetcher.js';
 import { generateEducationalTopics, generatePost } from './services/postGenerator.js';
@@ -22,6 +26,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173';
 const oauthStates = new Set();
+const TOKEN_STORE_PATH = path.join(__dirname, 'token-store.json');
 const upload = multer({
   dest: 'uploads/',
   limits: { fileSize: 10 * 1024 * 1024 },
@@ -89,17 +94,18 @@ app.get('/auth/linkedin/callback', async (req, res) => {
     const token = await exchangeCodeForToken(code);
     const profile = await getProfileFromToken(token.access_token);
 
-    res.type('text/plain').send(`LinkedIn OAuth success.
+    const tokenData = {
+      access_token: token.access_token,
+      personUrn: profile.personUrn,
+      expiresAt: Date.now() + token.expires_in * 1000,
+      updatedAt: new Date().toISOString(),
+    };
 
-Copy these values into backend/.env:
+    const tempPath = TOKEN_STORE_PATH + '.tmp';
+    await fs.writeFile(tempPath, JSON.stringify(tokenData, null, 2), { mode: 0o600 });
+    await fs.rename(tempPath, TOKEN_STORE_PATH);
 
-LINKEDIN_ACCESS_TOKEN=${token.access_token}
-LINKEDIN_PERSON_URN=${profile.personUrn}
-
-Token expires in: ${token.expires_in} seconds
-Name: ${profile.name || 'Not provided'}
-Email: ${profile.email || 'Not provided'}
-`);
+    res.type('text/plain').send('LinkedIn OAuth success. Tokens stored securely on server.');
   } catch (err) {
     console.error('LinkedIn OAuth callback error:', err);
     res.status(500).send(`Failed to exchange LinkedIn code: ${err.message}`);

@@ -1,33 +1,47 @@
 import axios from 'axios';
 import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import 'dotenv/config';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const LINKEDIN_API_BASE = 'https://api.linkedin.com/v2';
 const LINKEDIN_AUTH_BASE = 'https://www.linkedin.com/oauth/v2';
 const LINKEDIN_SCOPES = ['openid', 'profile', 'email', 'w_member_social'];
+const TOKEN_STORE_PATH = path.join(__dirname, '..', 'token-store.json');
 
-function getLinkedInToken() {
-  const token = process.env.LINKEDIN_ACCESS_TOKEN;
-  if (!token) throw new Error('Missing LINKEDIN_ACCESS_TOKEN in .env');
-  return token;
+async function readTokenStore() {
+  try {
+    const data = await fs.readFile(TOKEN_STORE_PATH, 'utf8');
+    return JSON.parse(data);
+  } catch {
+    return null;
+  }
 }
 
-function getPersonUrn() {
-  const rawUrn = process.env.LINKEDIN_PERSON_URN;
-  if (!rawUrn) throw new Error('Missing LINKEDIN_PERSON_URN in .env');
+async function getLinkedInToken() {
+  const store = await readTokenStore();
+  if (store?.access_token) return store.access_token;
+  if (process.env.LINKEDIN_ACCESS_TOKEN) return process.env.LINKEDIN_ACCESS_TOKEN;
+  throw new Error('No LinkedIn token found. Run OAuth flow first.');
+}
 
-  const match = rawUrn.match(/urn:li:person:[A-Za-z0-9_-]+/);
-  if (!match) {
-    throw new Error('LINKEDIN_PERSON_URN must look like urn:li:person:YOUR_ID');
+async function getPersonUrn() {
+  const store = await readTokenStore();
+  if (store?.personUrn) return store.personUrn;
+  if (process.env.LINKEDIN_PERSON_URN) {
+    const match = process.env.LINKEDIN_PERSON_URN.match(/urn:li:person:[A-Za-z0-9_-]+/);
+    if (match) return match[0];
   }
-
-  return match[0];
+  throw new Error('No LinkedIn person URN found. Run OAuth flow first.');
 }
 
 export async function getMyProfile() {
+  const token = await getLinkedInToken();
   const res = await axios.get(`${LINKEDIN_API_BASE}/userinfo`, {
     headers: {
-      Authorization: `Bearer ${getLinkedInToken()}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -98,8 +112,8 @@ export async function getProfileFromToken(accessToken) {
 }
 
 export async function publishToLinkedIn(postText) {
-  const token = getLinkedInToken();
-  const personUrn = getPersonUrn();
+  const token = await getLinkedInToken();
+  const personUrn = await getPersonUrn();
 
   const response = await axios.post(
     `${LINKEDIN_API_BASE}/ugcPosts`,
@@ -166,8 +180,8 @@ async function registerImageUpload({ token, personUrn }) {
 }
 
 export async function publishToLinkedInWithImage(postText, imageFile) {
-  const token = getLinkedInToken();
-  const personUrn = getPersonUrn();
+  const token = await getLinkedInToken();
+  const personUrn = await getPersonUrn();
 
   if (!imageFile?.path) {
     throw new Error('Image file is required');

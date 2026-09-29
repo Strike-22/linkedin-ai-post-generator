@@ -24,3 +24,6 @@ Thumbs.db
 .vscode/
 .idea/
 backend/publish-log.json
+
+# Token store (contains LinkedIn access tokens - never commit)
+backend/token-store.json
