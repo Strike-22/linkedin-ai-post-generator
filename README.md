@@ -2,6 +2,11 @@
 
 An end-to-end tool that generates educational LinkedIn posts using Google Gemini, manages a content queue, and publishes directly to LinkedIn — with optional daily scheduling via Redis-backed BullMQ job queues.
 
+## Architecture
+
+See the [interactive architecture diagram](docs/architecture-diagram.html) 
+(open in browser after cloning, or view the [static version](docs/architecture-diagram.html) on GitHub Pages if hosted).
+
 ## Development Notes
 
 This project was built with AI-assisted development (Claude, OpenCode, and Gemini for content generation). I directed the architecture, debugged issues, made product decisions (template design, topic strategy, image prompt logic), and iterated based on real LinkedIn performance data. AI tools helped with implementation speed, not the underlying judgment calls.
