@@ -44,7 +44,7 @@ async function getScheduler() {
 
 app.use(cors({
   origin(origin, callback) {
-    const allowedOrigins = new Set([corsOrigin, 'http://localhost:3000', 'null']);
+    const allowedOrigins = new Set([corsOrigin, 'http://localhost:3000']);
 
     if (!origin || allowedOrigins.has(origin)) {
       return callback(null, true);
