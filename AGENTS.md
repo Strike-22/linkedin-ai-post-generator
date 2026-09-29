@@ -1,22 +1,19 @@
 # Project context
 
-LinkedIn post automation app — AI agent that discovers trending AI/ML/data topics, generates storytelling-style LinkedIn posts, and schedules daily publishing via LinkedIn's API.
+LinkedIn post generator - AI tool that discovers data analytics/SQL/Excel/Python topics, generates LinkedIn posts via Gemini with 5 rotating template styles, generates a matching image prompt per post, and publishes to LinkedIn (manually triggered, not auto-scheduled in normal use).
 
 ## Stack
-- Frontend: React + Vite
-- Backend: Node.js + Express
-- AI generation: Anthropic Claude API
-- Scheduling: BullMQ (Redis-backed job queue) — not bare node-cron, jobs must survive server restarts
-- Database: PostgreSQL (settings, schedule configs, post history) + Redis (BullMQ queue, token cache)
-- LinkedIn integration: LinkedIn REST API v2, `/v2/ugcPosts`, OAuth 2.0
+- Frontend: Vanilla HTML/CSS/JS (index.html, app.js, styles.css), served via npx serve
+- Backend: Node.js + Express (server.js)
+- AI generation: Google Gemini API (@google/genai), model gemini-2.5-flash
+- Scheduling: BullMQ + Redis (scheduler.js) - implemented but currently DISABLED in normal use; daily posting is done manually
+- Database: NONE. Topics are an in-memory static pool (trendFetcher.js, 88 topics). Publish history is a flat JSON file (publish-log.json), not SQL.
+- LinkedIn integration: LinkedIn REST API v2, /v2/ugcPosts, OAuth 2.0
 
-## Key architectural goal
-Posts are pushed into LinkedIn's native scheduler queue via the `ugcPosts` API using `scheduledPublishTime` — not a self-managed publish-at-time-X worker. Confirm this is still the approach before changing the scheduling flow.
-
-## Conventions
-- JavaScript only — no TypeScript migration mid-project.
-- Disabling the schedule must stop all future jobs within one request — no orphaned BullMQ jobs left in Redis.
-- Any code touching the LinkedIn OAuth flow or token storage: flag it clearly, don't silently change scopes or token handling.
+## Known gotchas
+- topic.tag is a singular string, NOT topic.tags (array) - this was fixed once, don't reintroduce the old field name
+- CORS_ORIGIN in .env must match the actual frontend port (npx serve defaults to 3000, .env may default to 5173)
+- Gemini free tier: 20 requests/day - be economical with test generations
 
 ## Memory protocol
 - At the start of every session, read `MEMORY.md` in full before doing anything else.
