@@ -63,7 +63,8 @@ app.get('/api/me', async (req, res) => {
   try {
     res.json(await getMyProfile());
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Get profile error:', err);
+    res.status(500).json({ error: 'Failed to get LinkedIn profile' });
   }
 });
 
@@ -73,7 +74,8 @@ app.get('/auth/linkedin', (req, res) => {
     oauthStates.add(state);
     res.redirect(getAuthorizationUrl(state));
   } catch (err) {
-    res.status(500).send(err.message);
+    console.error('LinkedIn auth error:', err);
+    res.status(500).send('Failed to start LinkedIn authorization');
   }
 });
 
@@ -108,7 +110,7 @@ app.get('/auth/linkedin/callback', async (req, res) => {
     res.type('text/plain').send('LinkedIn OAuth success. Tokens stored securely on server.');
   } catch (err) {
     console.error('LinkedIn OAuth callback error:', err);
-    res.status(500).send(`Failed to exchange LinkedIn code: ${err.message}`);
+    res.status(500).send('Failed to exchange LinkedIn code');
   }
 });
 
@@ -148,7 +150,7 @@ app.post('/api/images/generate', async (req, res) => {
     res.json({ success: true, image });
   } catch (err) {
     console.error('Gemini image generation error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to generate image' });
   }
 });
 
@@ -190,11 +192,7 @@ app.post('/api/publish', async (req, res) => {
       linkedinStatus: err.response?.status,
       linkedinDetails: err.response?.data,
     });
-    res.status(500).json({
-      error: err.message,
-      linkedinStatus: err.response?.status,
-      linkedinDetails: err.response?.data,
-    });
+    res.status(500).json({ error: 'Failed to publish to LinkedIn' });
   }
 });
 
@@ -222,11 +220,7 @@ app.post('/api/publish/image', upload.single('image'), async (req, res) => {
       linkedinStatus: err.response?.status,
       linkedinDetails: err.response?.data,
     });
-    res.status(500).json({
-      error: err.message,
-      linkedinStatus: err.response?.status,
-      linkedinDetails: err.response?.data,
-    });
+    res.status(500).json({ error: 'Failed to publish to LinkedIn' });
   } finally {
     if (req.file?.path) {
       fs.unlink(req.file.path).catch(() => {});
@@ -251,7 +245,7 @@ app.post('/api/schedule', async (req, res) => {
     res.json({ success: true, job });
   } catch (err) {
     console.error('Schedule error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to schedule post' });
   }
 });
 
@@ -268,7 +262,7 @@ app.post('/api/schedule/daily', async (req, res) => {
     res.json({ success: true, job });
   } catch (err) {
     console.error('Daily schedule error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to schedule daily post' });
   }
 });
 
@@ -277,7 +271,8 @@ app.get('/api/schedule', async (req, res) => {
     const { getAllJobs } = await getScheduler();
     res.json(await getAllJobs());
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Get scheduled jobs error:', err);
+    res.status(500).json({ error: 'Failed to get scheduled jobs' });
   }
 });
 
@@ -287,7 +282,8 @@ app.delete('/api/schedule/:jobId', async (req, res) => {
     await cancelJob(req.params.jobId);
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Cancel schedule error:', err);
+    res.status(500).json({ error: 'Failed to cancel scheduled job' });
   }
 });
 
